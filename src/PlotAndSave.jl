@@ -37,8 +37,8 @@ end
 
 function updateline(old_line::LineInfo, new_line::LineInfo)
     total_traj = old_line.traj + new_line.traj
-    x = (old_line.traj .* old_line.x .+ new_line.traj .* new_line.x) ./ total_traj
-    return LineInfo(x, new_line.y, total_traj, new_line.tag)
+    y = (old_line.traj .* old_line.y .+ new_line.traj .* new_line.y) ./ total_traj
+    return LineInfo(new_line.x, y, total_traj, new_line.tag)
 end
 
 end # module

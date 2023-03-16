@@ -31,8 +31,8 @@ line2_traj = 1
         addtrajectories(path, line1, line2)
 
         plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
-        @test plotinfo.lines["1"].y == y1
-        @test plotinfo.lines["2"].y == y2
+        @test plotinfo.lines["1"].x == x1
+        @test plotinfo.lines["2"].x == x2
         @test plotinfo.lines["1"].traj == line1_traj * 2
         @test plotinfo.lines["2"].traj == line2_traj * 2
     end
