@@ -6,22 +6,35 @@ using Gadfly
 include("PlotStructs.jl")
 
 export makeplot
+export makehistogram
 export addtrajectories
 
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
     mkpath(path)
-    saveplot(path, plotinfo)
+    savefigure(path, plotinfo)
     jldsave(joinpath(path, "data.jld2"); plotinfo)
 end
 
-function saveplot(path::String, plotinfo::PlotInfo)
+function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", param...)
+    histograminfo = HistogramInfo(data; xlabel, ylabel, param...)
+    mkpath(path)
+    savefigure(path, histograminfo)
+    jldsave(joinpath(path, "data.jld2"); histograminfo)
+end
+
+function savefigure(path::String, plotinfo::PlotInfo)
     layers = []
     for lineinfo in values(plotinfo.lines)
         new_layer = layer(x=lineinfo.x, y=lineinfo.y, Geom.line, color = [lineinfo.tag])
         push!(layers, new_layer)
     end
     p = plot(layers..., Guide.title(plotinfo.title), Guide.xlabel(plotinfo.xlabel), Guide.ylabel(plotinfo.ylabel))
+    p |> SVG(joinpath(path, "plot.svg"))
+end
+
+function savefigure(path::String, histograminfo::HistogramInfo)
+    p = plot(x = histograminfo.data, Geom.histogram, Guide.title(histograminfo.title), Guide.xlabel(histograminfo.xlabel), Guide.ylabel(histograminfo.ylabel))
     p |> SVG(joinpath(path, "plot.svg"))
 end
 

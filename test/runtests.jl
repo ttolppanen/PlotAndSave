@@ -37,4 +37,13 @@ line2_traj = 1
         @test plotinfo.lines["2"].traj == line2_traj * 2
     end
 
+    @testset "HistogramInfo" begin
+        data = 10 * rand(100)
+        path = joinpath(@__DIR__, "test_data_histogram")
+        makehistogram(path, data; xlabel = "xlabel", ylabel = "Count", dt = 0.2, n = 4, testing = "abcd")
+        
+        histograminfo = load(joinpath(path, "data.jld2"), "histograminfo")
+        @test all(histograminfo.data .== data)
+    end
+
 end # testset

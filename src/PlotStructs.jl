@@ -1,5 +1,6 @@
 export LineInfo
 export PlotInfo
+export HistogramInfo
 
 struct LineInfo
     x::AbstractArray
@@ -22,6 +23,19 @@ struct PlotInfo
         title = parameters_to_title(; param...)
         param_dict = Dict(param...)
         return new(lines_dict, param_dict, xlabel, ylabel, title)
+    end
+end
+
+struct HistogramInfo
+    data::Array{<:Number}
+    parameters::Dict{Symbol, Any}
+    xlabel::String
+    ylabel::String
+    title::String
+    function HistogramInfo(data::Array{<:Number}; xlabel::String = "x", ylabel::String = "y", param...)
+        title = parameters_to_title(; param...)
+        param_dict = Dict(param...)
+        return new(data, param_dict, xlabel, ylabel, title)
     end
 end
 
