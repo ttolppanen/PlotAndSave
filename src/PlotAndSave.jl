@@ -8,6 +8,7 @@ include("PlotStructs.jl")
 export makeplot
 export makehistogram
 export addtrajectories
+export combineplots
 
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
@@ -52,6 +53,15 @@ function updateline(old_line::LineInfo, new_line::LineInfo)
     total_traj = old_line.traj + new_line.traj
     y = (old_line.traj .* old_line.y .+ new_line.traj .* new_line.y) ./ total_traj
     return LineInfo(new_line.x, y, total_traj, new_line.tag)
+end
+
+function combineplots(new_path,path_to_folder1::String, path_to_folder2::String)
+    plot1 = load(joinpath(path_to_folder1, "data.jld2"), "plotinfo")
+    plot2 = load(joinpath(path_to_folder2, "data.jld2"), "plotinfo")
+    combineplots(new_path, plot1, plot2)
+end
+function combineplots(new_path, plot1::PlotInfo, plot2::PlotInfo)
+    makeplot(new_path, values(plot1.lines)..., values(plot2.lines)...; xlabel = plot1.xlabel, ylabel = plot1.ylabel, plot1.parameters...)
 end
 
 end # module
