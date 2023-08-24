@@ -1,7 +1,7 @@
 module PlotAndSave
 
 using JLD2
-using Gadfly
+using Plots
 
 include("PlotStructs.jl")
 
@@ -25,18 +25,19 @@ function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", p
 end
 
 function savefigure(path::String, plotinfo::PlotInfo)
-    layers = []
-    for lineinfo in values(plotinfo.lines)
-        new_layer = layer(x=lineinfo.x, y=lineinfo.y, Geom.line, color = [lineinfo.tag])
-        push!(layers, new_layer)
+    p = plot(title = plotinfo.title, xlabel = plotinfo.xlabel, ylabel = plotinfo.ylabel, dpi = 300)
+    for line in values(plotinfo.lines)
+        plot!(p, line.x, line.y, label = line.tag)
     end
-    p = plot(layers..., Guide.title(plotinfo.title), Guide.xlabel(plotinfo.xlabel), Guide.ylabel(plotinfo.ylabel))
-    p |> SVG(joinpath(path, "plot.svg"))
+    savefig(p, joinpath(path, "plot.png"))
 end
 
 function savefigure(path::String, histograminfo::HistogramInfo)
-    p = plot(x = histograminfo.data, Geom.histogram, Guide.title(histograminfo.title), Guide.xlabel(histograminfo.xlabel), Guide.ylabel(histograminfo.ylabel))
-    p |> SVG(joinpath(path, "plot.svg"))
+    p = histogram(histograminfo.data, dpi = 300)
+    title!(p, histograminfo.title)
+    xlabel!(p, histograminfo.xlabel)
+    ylabel!(p, histograminfo.ylabel)
+    savefig(p, joinpath(path, "plot.png"))
 end
 
 function addtrajectories(path_to_prev_data::String, new_trajectories...)
