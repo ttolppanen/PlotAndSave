@@ -25,7 +25,13 @@ function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", p
 end
 
 function savefigure(path::String, plotinfo::PlotInfo)
-    p = plot(title = plotinfo.title, xlabel = plotinfo.xlabel, ylabel = plotinfo.ylabel, dpi = 300)
+    p = plot(
+        title = plotinfo.title, 
+        xlabel = plotinfo.xlabel, 
+        ylabel = plotinfo.ylabel, 
+        legend = :outertopright, 
+        titlefontsize = 9,
+        dpi = 300)
     for line in values(plotinfo.lines)
         plot!(p, line.x, line.y, label = line.tag)
     end
@@ -33,7 +39,7 @@ function savefigure(path::String, plotinfo::PlotInfo)
 end
 
 function savefigure(path::String, histograminfo::HistogramInfo)
-    p = histogram(histograminfo.data, dpi = 300)
+    p = histogram(histograminfo.data, legend = :outertopright, titlefontsize = 9, dpi = 300)
     title!(p, histograminfo.title)
     xlabel!(p, histograminfo.xlabel)
     ylabel!(p, histograminfo.ylabel)
