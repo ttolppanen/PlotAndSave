@@ -1,3 +1,5 @@
+# using OrderedCollections
+
 export LineInfo
 export PlotInfo
 export HistogramInfo
@@ -10,13 +12,13 @@ struct LineInfo
 end
 
 struct PlotInfo
-    lines::Dict{String, LineInfo}
+    lines::OrderedDict{String, LineInfo}
     parameters::Dict{Symbol, Any}
     xlabel::String
     ylabel::String
     title::String
     function PlotInfo(lines...; xlabel::String = "x", ylabel::String = "y", param...)
-        lines_dict = Dict{String, LineInfo}()
+        lines_dict = OrderedDict{String, LineInfo}()
         for line in lines
             lines_dict[line.tag] = line
         end

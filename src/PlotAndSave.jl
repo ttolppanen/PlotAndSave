@@ -2,6 +2,7 @@ module PlotAndSave
 
 using JLD2
 using Plots
+using OrderedCollections
 
 include("PlotStructs.jl")
 
