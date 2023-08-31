@@ -11,17 +11,23 @@ export makehistogram
 export addtrajectories
 export combineplots
 
-function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", param...)
+function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
     mkpath(path)
     savefigure(path, plotinfo)
+    if copy_code
+        copycode(path)
+    end
     jldsave(joinpath(path, "data.jld2"); plotinfo)
 end
 
-function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", param...)
+function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
     histograminfo = HistogramInfo(data; xlabel, ylabel, param...)
     mkpath(path)
     savefigure(path, histograminfo)
+    if copy_code
+        copycode(path)
+    end
     jldsave(joinpath(path, "data.jld2"); histograminfo)
 end
 
@@ -64,7 +70,7 @@ function addtrajectories(path_to_prev_data::String, new_trajectories...)
         old_line = plotinfo.lines[traj.tag]
         new_lines[traj.tag] = updateline(old_line, traj)
     end
-    makeplot(path_to_prev_data, values(new_lines)...; xlabel = plotinfo.xlabel, ylabel = plotinfo.ylabel, plotinfo.parameters...)
+    makeplot(path_to_prev_data, values(new_lines)...; xlabel = plotinfo.xlabel, ylabel = plotinfo.ylabel, copy_code = false, plotinfo.parameters...)
 end
 
 function updateline(old_line::LineInfo, new_line::LineInfo)
@@ -79,7 +85,13 @@ function combineplots(new_path,path_to_folder1::String, path_to_folder2::String)
     combineplots(new_path, plot1, plot2)
 end
 function combineplots(new_path, plot1::PlotInfo, plot2::PlotInfo)
-    makeplot(new_path, values(plot1.lines)..., values(plot2.lines)...; xlabel = plot1.xlabel, ylabel = plot1.ylabel, plot1.parameters...)
+    makeplot(new_path, values(plot1.lines)..., values(plot2.lines)...; xlabel = plot1.xlabel, ylabel = plot1.ylabel, copy_code = false, plot1.parameters...)
+end
+
+function copycode(path)
+    path_to_code = Base.source_path()
+    save_path = joinpath(path, "code.jl")
+    cp(path_to_code, save_path; force = true)
 end
 
 end # module
