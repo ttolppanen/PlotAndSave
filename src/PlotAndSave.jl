@@ -26,15 +26,25 @@ function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", p
 end
 
 function savefigure(path::String, plotinfo::PlotInfo)
+    traj_numbers = [line.traj for line in values(plotinfo.lines)]
+    all_same_traj = all(traj_numbers[1] .== traj_numbers)
+    title_to_show = plotinfo.title
+    if all_same_traj && traj_numbers[1] != 1
+        title_to_show *= ", traj = $(traj_numbers[1])"
+    end
     p = plot(
-        title = plotinfo.title, 
+        title = title_to_show,
         xlabel = plotinfo.xlabel, 
         ylabel = plotinfo.ylabel, 
         legend = :outertopright, 
         titlefontsize = 9,
         dpi = 300)
     for line in values(plotinfo.lines)
-        plot!(p, line.x, line.y, label = line.tag)
+        if !all_same_traj
+            plot!(p, line.x, line.y, label = line.tag * ", traj = $(line.traj)")
+        else
+            plot!(p, line.x, line.y, label = line.tag)
+        end
     end
     savefig(p, joinpath(path, "plot.png"))
 end

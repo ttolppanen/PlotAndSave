@@ -66,4 +66,33 @@ line2_traj = 1
         @test plotinfo.lines["1"].traj == line1_traj
     end
 
+    function random_plot(traj, index)
+        lines = []
+        for i in eachindex(traj)
+            push!(lines, LineInfo(rand(10), rand(10), traj[i], "$i"))
+        end
+        path = joinpath(@__DIR__, "test_data", "traj_adding$index")
+        makeplot(path, lines...; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd")
+    end
+
+    function random_add_plot(traj, index)
+        lines = []
+        for i in eachindex(traj)
+            push!(lines, LineInfo(rand(10), rand(10), traj[i], "$i"))
+        end
+        path = joinpath(@__DIR__, "test_data", "traj_adding$index")
+        addtrajectories(path, lines...)
+    end
+
+    @testset "Traj To Title" begin
+        random_plot([1, 1, 1, 1], 1)
+        random_plot([1, 2, 3, 4], 2)
+        random_plot([5, 5, 5, 5], 3)
+        random_plot([5], 4)
+        random_plot([1, 1, 1, 1], 5)
+        random_add_plot([1, 1, 1, 1], 5)
+        random_plot([1, 1, 1, 1], 6)
+        random_add_plot([1, 3, 1, 4], 6)
+    end
+
 end # testset
