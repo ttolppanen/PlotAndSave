@@ -46,7 +46,11 @@ function parameters_to_title(; param...)
     newlinesadded = 0
     for key in keys(param)
         value = param[key]
-        stringToAdd = "$key = $value,"
+        if isa(value, ValueInfo)
+            stringToAdd = "$key = $(value.str_val),"
+        else
+            stringToAdd = "$key = $value,"
+        end
         if length(out * stringToAdd) > 50 * (newlinesadded + 1)
             out *= "\n"
             newlinesadded += 1;

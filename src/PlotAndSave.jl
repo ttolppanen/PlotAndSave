@@ -4,6 +4,7 @@ using JLD2
 using Plots
 using OrderedCollections
 
+include("ParameterStruct.jl")
 include("PlotStructs.jl")
 
 export makeplot

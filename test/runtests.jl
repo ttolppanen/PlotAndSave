@@ -95,4 +95,18 @@ line2_traj = 1
         random_add_plot([1, 3, 1, 4], 6)
     end
 
+    @testset "ValueInfo" begin
+        param = Dict()
+        param[:dt] = 0.2
+        param[:v] = ValueInfo([0,1,2], "vec [1 2 3]")
+        title = PlotAndSave.parameters_to_title(; param...)
+
+        @test title == "dt = 0.2, v = $(param[:v].str_val)" || title == "v = $(param[:v].str_val), dt = 0.2"
+
+        x1 = rand(10); y1 = rand(10)
+        line1 = LineInfo(x1, y1, 1, "1")
+        path = joinpath(@__DIR__, "test_data", "ValueInfo")
+        makeplot(path, line1; ylabel = "Random Values", copy_code = false, param...)
+    end
+
 end # testset
