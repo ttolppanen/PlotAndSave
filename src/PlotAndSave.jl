@@ -11,6 +11,7 @@ export makeplot
 export makehistogram
 export addtrajectories
 export combineplots
+export get_traj
 
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
@@ -93,6 +94,20 @@ function copycode(path)
     path_to_code = Base.source_path()
     save_path = joinpath(path, "code.jl")
     cp(path_to_code, save_path; force = true)
+end
+
+function get_traj(path::String)
+    plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+    return get_traj(plotinfo)
+end
+function get_traj(plotinfo::PlotInfo)
+    traj_numbers = [line.traj for line in values(plotinfo.lines)]
+    all_same_traj = all(traj_numbers[1] .== traj_numbers)
+    if all_same_traj
+        return traj_numbers[1]
+    else
+        return traj_numbers
+    end
 end
 
 end # module

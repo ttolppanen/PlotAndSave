@@ -109,4 +109,13 @@ line2_traj = 1
         makeplot(path, line1; ylabel = "Random Values", copy_code = false, param...)
     end
 
+    @testset "Get Traj" begin
+        path = joinpath(@__DIR__, "test_data", "traj_adding1")
+        @test get_traj(path) == 1
+        path = joinpath(@__DIR__, "test_data", "traj_adding2")
+        @test get_traj(path) == [1, 2, 3, 4]
+        path = joinpath(@__DIR__, "test_data", "traj_adding3")
+        @test get_traj(path) == 5
+    end
+
 end # testset
