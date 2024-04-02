@@ -41,9 +41,13 @@ line2_traj = 1
         data = 10 * rand(100)
         path = joinpath(@__DIR__, "test_data_histogram")
         makehistogram(path, data; xlabel = "xlabel", ylabel = "Count", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
-        
+
         histograminfo = load(joinpath(path, "data.jld2"), "histograminfo")
         @test all(histograminfo.data .== data)
+
+        #bins
+        path = joinpath(@__DIR__, "test_data_histogram", "bins")
+        makehistogram(path, data; xlabel = "xlabel", ylabel = "Count", dt = 0.2, n = 4, testing = "abcd", copy_code = false, bins = range(0.0, 10.0, 101))
     end
 
     @testset "Combining Plots" begin

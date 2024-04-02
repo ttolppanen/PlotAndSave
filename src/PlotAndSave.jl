@@ -23,10 +23,10 @@ function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", co
     jldsave(joinpath(path, "data.jld2"); plotinfo)
 end
 
-function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
+function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", copy_code = true, bins = nothing, param...)
     histograminfo = HistogramInfo(data; xlabel, ylabel, param...)
     mkpath(path)
-    savefigure(path, histograminfo)
+    savefigure(path, histograminfo; bins)
     if copy_code
         copycode(path)
     end
@@ -57,8 +57,12 @@ function savefigure(path::String, plotinfo::PlotInfo)
     savefig(p, joinpath(path, "plot.png"))
 end
 
-function savefigure(path::String, histograminfo::HistogramInfo)
-    p = histogram(histograminfo.data, legend = :outertopright, titlefontsize = 9, dpi = 300)
+function savefigure(path::String, histograminfo::HistogramInfo; bins = nothing)
+    if isa(bins, Nothing)
+        p = histogram(histograminfo.data, legend = :outertopright, titlefontsize = 9, dpi = 300)
+    else
+        p = histogram(histograminfo.data, legend = :outertopright, titlefontsize = 9, dpi = 300; bins)
+    end
     title!(p, histograminfo.title)
     xlabel!(p, histograminfo.xlabel)
     ylabel!(p, histograminfo.ylabel)
