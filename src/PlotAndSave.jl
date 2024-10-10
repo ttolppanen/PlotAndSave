@@ -8,6 +8,9 @@ include("ParameterStruct.jl")
 include("PlotStructs.jl")
 
 export makeplot
+export savedata
+export loaddata
+export savefigure
 export makehistogram
 export addtrajectories
 export combineplots
@@ -15,12 +18,15 @@ export get_traj
 
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
-    mkpath(path)
+    makeplot(path, plotinfo; copy_code)
+end
+
+function makeplot(path, plotinfo::PlotInfo; copy_code = true)
     savefigure(path, plotinfo)
     if copy_code
         copycode(path)
     end
-    jldsave(joinpath(path, "data.jld2"); plotinfo)
+    savedata(path, plotinfo)
 end
 
 function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", copy_code = true, bins = nothing, param...)
@@ -33,7 +39,21 @@ function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", c
     jldsave(joinpath(path, "data.jld2"); histograminfo)
 end
 
+function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", param...)
+    plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
+    savedata(path, plotinfo)
+end
+function savedata(path, plotinfo)
+    mkpath(path)
+    jldsave(joinpath(path, "data.jld2"); plotinfo)
+end
+
+function loaddata(path)
+    load(path, "plotinfo")
+end
+
 function savefigure(path::String, plotinfo::PlotInfo)
+    mkpath(path)
     traj_numbers = [line.traj for line in values(plotinfo.lines)]
     all_same_traj = all(traj_numbers[1] .== traj_numbers)
     title_to_show = plotinfo.title
