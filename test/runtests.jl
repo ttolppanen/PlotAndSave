@@ -129,11 +129,12 @@ line2_traj = 1
         line2 = LineInfo(x2, y2, line2_traj, "2")
         path = joinpath(@__DIR__, "save_load_test_data")
 
+        # check here that there are 3 folders, loaddata, makeplot, savedata
+        # and that the plot in make plot and loaddata is the same
         makeplot(joinpath(path, "makeplot"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
-        savedata(joinpath(path, "savedata"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd")
+        savedata(joinpath(path, "savedata"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
         plotinfo = loaddata(joinpath(path, "savedata", "data.jld2"))
         makeplot(joinpath(path, "loaddata"), plotinfo; copy_code = false)
-        
     end
 
 end # testset

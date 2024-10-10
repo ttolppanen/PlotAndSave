@@ -22,11 +22,8 @@ function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", co
 end
 
 function makeplot(path, plotinfo::PlotInfo; copy_code = true)
+    savedata(path, plotinfo; copy_code)
     savefigure(path, plotinfo)
-    if copy_code
-        copycode(path)
-    end
-    savedata(path, plotinfo)
 end
 
 function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", copy_code = true, bins = nothing, param...)
@@ -39,12 +36,15 @@ function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", c
     jldsave(joinpath(path, "data.jld2"); histograminfo)
 end
 
-function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", param...)
+function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
-    savedata(path, plotinfo)
+    savedata(path, plotinfo; copy_code)
 end
-function savedata(path, plotinfo)
+function savedata(path, plotinfo; copy_code = true)
     mkpath(path)
+    if copy_code
+        copycode(path)
+    end
     jldsave(joinpath(path, "data.jld2"); plotinfo)
 end
 
