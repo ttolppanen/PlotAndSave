@@ -40,7 +40,7 @@ function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", co
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
     savedata(path, plotinfo; copy_code)
 end
-function savedata(path, plotinfo; copy_code = true)
+function savedata(path, plotinfo::PlotInfo; copy_code = true)
     mkpath(path)
     if copy_code
         copycode(path)
