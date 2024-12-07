@@ -15,6 +15,7 @@ export makehistogram
 export addtrajectories
 export combineplots
 export get_traj
+export x_ticks
 
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
@@ -132,6 +133,37 @@ function get_traj(plotinfo::PlotInfo)
     else
         return traj_numbers
     end
+end
+
+function x_ticks(start, stop, n_ticks, specific_points...)
+    # specific_points[1] = start
+    # specific_points[2] = end
+    # specific_points[3] = tick factor e.g. 2 means that there will be 2 times more ticks in this specific_points
+    out = []
+    default_step = (stop - start) / (n_ticks - 1)
+    current_step = start
+    push!(out, current_step)
+    flag = false # if we added point in specific point
+    while current_step < stop
+        for sp in specific_points
+            if sp[1] <= current_step && current_step < sp[2]
+                current_step += default_step / sp[3]
+                if current_step > sp[2]
+                    current_step = sp[2]
+                end
+                push!(out, current_step)
+                flag = true
+                break
+            end
+        end
+        if flag
+            flag = false
+            continue
+        end
+        current_step += default_step
+        push!(out, current_step)
+    end
+    return out
 end
 
 end # module

@@ -137,4 +137,11 @@ line2_traj = 1
         makeplot(joinpath(path, "loaddata"), plotinfo; copy_code = false)
     end
 
+    @testset "Make x-ticks" begin
+        x = x_ticks(1, 10, 10, (4,6,2))
+        @test (x[4] == 4 && x[5] == 4.5 && x[6] == 5 && x[7] == 5.5 && x[8] == 6)
+        x = x_ticks(1, 3, 100, (1, 2, 2), (2.25, 2.75, 2)) # 100 + 50 + 25
+        @test length(x) == 175
+    end
+
 end # testset
