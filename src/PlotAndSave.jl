@@ -6,6 +6,7 @@ using OrderedCollections
 
 include("ParameterStruct.jl")
 include("PlotStructs.jl")
+include("FolderLocking.jl")
 
 export makeplot
 export savedata
@@ -43,14 +44,19 @@ function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", co
 end
 function savedata(path, plotinfo::PlotInfo; copy_code = true)
     mkpath(path)
+    wait_and_lock_folder(path)
     if copy_code
         copycode(path)
     end
     jldsave(joinpath(path, "data.jld2"); plotinfo)
+    remove_lock(path)
 end
 
 function loaddata(path)
-    load(path, "plotinfo")
+    wait_and_lock_folder(dirname(path))
+    data = load(path, "plotinfo")
+    remove_lock(dirname(path))
+    return data
 end
 
 function savefigure(path::String, plotinfo::PlotInfo)
@@ -75,7 +81,9 @@ function savefigure(path::String, plotinfo::PlotInfo)
             plot!(p, line.x, line.y, label = line.tag)
         end
     end
+    wait_and_lock_folder(path)
     savefig(p, joinpath(path, "plot.png"))
+    remove_lock(path)
 end
 
 function savefigure(path::String, histograminfo::HistogramInfo; bins = nothing)
@@ -87,11 +95,15 @@ function savefigure(path::String, histograminfo::HistogramInfo; bins = nothing)
     title!(p, histograminfo.title)
     xlabel!(p, histograminfo.xlabel)
     ylabel!(p, histograminfo.ylabel)
+    wait_and_lock_folder(path)
     savefig(p, joinpath(path, "plot.png"))
+    remove_lock(path)
 end
 
 function addtrajectories(path_to_prev_data::String, new_trajectories...)
+    wait_and_lock_folder(path_to_prev_data)
     plotinfo = load(joinpath(path_to_prev_data, "data.jld2"), "plotinfo")
+    remove_lock(path_to_prev_data)
     new_lines = plotinfo.lines
     for traj in new_trajectories
         old_line = plotinfo.lines[traj.tag]
@@ -106,9 +118,13 @@ function updateline(old_line::LineInfo, new_line::LineInfo)
     return LineInfo(new_line.x, y, total_traj, new_line.tag)
 end
 
-function combineplots(new_path,path_to_folder1::String, path_to_folder2::String)
+function combineplots(new_path, path_to_folder1::String, path_to_folder2::String)
+    wait_and_lock_folder(path_to_folder1)
     plot1 = load(joinpath(path_to_folder1, "data.jld2"), "plotinfo")
+    remove_lock(path_to_folder1)
+    wait_and_lock_folder(path_to_folder2)
     plot2 = load(joinpath(path_to_folder2, "data.jld2"), "plotinfo")
+    remove_lock(path_to_folder2)
     combineplots(new_path, plot1, plot2)
 end
 function combineplots(new_path, plot1::PlotInfo, plot2::PlotInfo)
@@ -118,7 +134,11 @@ end
 function copycode(path)
     path_to_code = Base.source_path()
     save_path = joinpath(path, "code.jl")
+    wait_and_lock_folder(dirname(path_to_code))
+    wait_and_lock_folder(path)
     cp(path_to_code, save_path; force = true)
+    remove_lock(path)
+    remove_lock(dirname(path_to_code))
 end
 
 function get_traj(path::String)
@@ -136,9 +156,10 @@ function get_traj(plotinfo::PlotInfo)
 end
 
 function x_ticks(start, stop, n_ticks, specific_points...)
-    # specific_points[1] = start
-    # specific_points[2] = end
-    # specific_points[3] = tick factor e.g. 2 means that there will be 2 times more ticks in this specific_points
+    # sp = specific_points[1] for example
+    # sp[1] = start
+    # sp[2] = end
+    # sp[3] = tick factor e.g. 2 means that there will be 2 times more ticks in this specific_points
     out = []
     default_step = (stop - start) / (n_ticks - 1)
     current_step = start
