@@ -14,7 +14,7 @@ line2_traj = 1
         path = joinpath(@__DIR__, "test_data")
         makeplot(path, line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
 
-        plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+        plotinfo = load(joinpath(path, PlotAndSave.PaS_DATA_FILE_NAME), "plotinfo")
         @test plotinfo.lines["1"].x == x1
         @test plotinfo.lines["2"].x == x2
         @test plotinfo.lines["1"].y == y1
@@ -30,7 +30,7 @@ line2_traj = 1
         path = joinpath(@__DIR__, "test_data")
         addtrajectories(path, line1, line2)
 
-        plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+        plotinfo = load(joinpath(path, PlotAndSave.PaS_DATA_FILE_NAME), "plotinfo")
         @test plotinfo.lines["1"].x == x1
         @test plotinfo.lines["2"].x == x2
         @test plotinfo.lines["1"].traj == line1_traj * 2
@@ -41,14 +41,23 @@ line2_traj = 1
         x2 = rand(10); y2 = rand(10)
         line1 = LineInfo(x1, y1, line1_traj, "1")
         line2 = LineInfo(x2, y2, line2_traj, "2")
-        path = joinpath(@__DIR__, "test_data")
-        makeplot(path, line1, line2; add_traj = true)
+        path = joinpath(@__DIR__, "makeplot_update_traj", "test_data")
 
-        plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+        makeplot(path, line1, line2; add_traj = true)
+        plotinfo = load(joinpath(path, PlotAndSave.PaS_DATA_FILE_NAME), "plotinfo")
         @test plotinfo.lines["1"].x == x1
         @test plotinfo.lines["2"].x == x2
-        @test plotinfo.lines["1"].traj == line1_traj * 3
-        @test plotinfo.lines["2"].traj == line2_traj * 3
+        @test plotinfo.lines["1"].traj == line1_traj
+        @test plotinfo.lines["2"].traj == line2_traj
+
+        makeplot(path, line1, line2; add_traj = true)
+        plotinfo = load(joinpath(path, PlotAndSave.PaS_DATA_FILE_NAME), "plotinfo")
+        @test plotinfo.lines["1"].x == x1
+        @test plotinfo.lines["2"].x == x2
+        @test plotinfo.lines["1"].traj == line1_traj * 2
+        @test plotinfo.lines["2"].traj == line2_traj * 2
+
+        rm(path; recursive = true)        
     end
 
     @testset "HistogramInfo" begin
@@ -56,7 +65,7 @@ line2_traj = 1
         path = joinpath(@__DIR__, "test_data_histogram")
         makehistogram(path, data; xlabel = "xlabel", ylabel = "Count", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
 
-        histograminfo = load(joinpath(path, "data.jld2"), "histograminfo")
+        histograminfo = load(joinpath(path, PlotAndSave.PaS_DATA_FILE_NAME), "histograminfo")
         @test all(histograminfo.data .== data)
 
         #bins
@@ -76,7 +85,7 @@ line2_traj = 1
         new_path = joinpath(@__DIR__, "combine_plots_test", "combined_data")
         combineplots(new_path, path1, path2)
 
-        plotinfo = load(joinpath(new_path, "data.jld2"), "plotinfo")
+        plotinfo = load(joinpath(new_path, PlotAndSave.PaS_DATA_FILE_NAME), "plotinfo")
         @test plotinfo.lines["1"].x == x1
         @test plotinfo.lines["2"].x == x2
         @test plotinfo.lines["1"].y == y1
@@ -147,7 +156,7 @@ line2_traj = 1
         # and that the plot in make plot and loaddata is the same
         makeplot(joinpath(path, "makeplot"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
         savedata(joinpath(path, "savedata"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
-        plotinfo = loaddata(joinpath(path, "savedata", "data.jld2"))
+        plotinfo = loaddata(joinpath(path, "savedata", PlotAndSave.PaS_DATA_FILE_NAME))
         makeplot(joinpath(path, "loaddata"), plotinfo; copy_code = false)
     end
 

@@ -18,13 +18,16 @@ export combineplots
 export get_traj
 export x_ticks
 
+const PaS_DATA_FILE_NAME = "data.jld2"
+const PaS_PLOT_FILE_NAME = "plot.png"
+
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, add_traj = false, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
     makeplot(path, plotinfo; copy_code, add_traj)
 end
 
 function makeplot(path, plotinfo::PlotInfo; copy_code = true, add_traj = false)
-    if add_traj
+    if add_traj && isfile(joinpath(path, PaS_DATA_FILE_NAME))
         addtrajectories(path, collect(values(plotinfo.lines))...)
     else
         savedata(path, plotinfo; copy_code)
@@ -39,7 +42,7 @@ function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", c
     if copy_code
         copycode(path)
     end
-    jldsave(joinpath(path, "data.jld2"); histograminfo)
+    jldsave(joinpath(path, PaS_DATA_FILE_NAME); histograminfo)
 end
 
 function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
@@ -48,11 +51,11 @@ function savedata(path, lines...; xlabel::String = "x", ylabel::String = "y", co
 end
 function savedata(path, plotinfo::PlotInfo; copy_code = true)
     mkpath(path)
-    wait_and_lock_folder(path)
     if copy_code
         copycode(path)
     end
-    jldsave(joinpath(path, "data.jld2"); plotinfo)
+    wait_and_lock_folder(path)
+    jldsave(joinpath(path, PaS_DATA_FILE_NAME); plotinfo)
     remove_lock(path)
 end
 
@@ -86,7 +89,7 @@ function savefigure(path::String, plotinfo::PlotInfo)
         end
     end
     wait_and_lock_folder(path)
-    savefig(p, joinpath(path, "plot.png"))
+    savefig(p, joinpath(path, PaS_PLOT_FILE_NAME))
     remove_lock(path)
 end
 
@@ -100,13 +103,13 @@ function savefigure(path::String, histograminfo::HistogramInfo; bins = nothing)
     xlabel!(p, histograminfo.xlabel)
     ylabel!(p, histograminfo.ylabel)
     wait_and_lock_folder(path)
-    savefig(p, joinpath(path, "plot.png"))
+    savefig(p, joinpath(path, PaS_PLOT_FILE_NAME))
     remove_lock(path)
 end
 
 function addtrajectories(path_to_prev_data::String, new_trajectories...)
     wait_and_lock_folder(path_to_prev_data)
-    plotinfo = load(joinpath(path_to_prev_data, "data.jld2"), "plotinfo")
+    plotinfo = load(joinpath(path_to_prev_data, PaS_DATA_FILE_NAME), "plotinfo")
     new_lines = plotinfo.lines
     for traj in new_trajectories
         old_line = plotinfo.lines[traj.tag]
@@ -125,8 +128,8 @@ end
 function combineplots(new_path, path_to_folder1::String, path_to_folder2::String)
     wait_and_lock_folder(path_to_folder1)
     wait_and_lock_folder(path_to_folder2)
-    plot1 = load(joinpath(path_to_folder1, "data.jld2"), "plotinfo")
-    plot2 = load(joinpath(path_to_folder2, "data.jld2"), "plotinfo")
+    plot1 = load(joinpath(path_to_folder1, PaS_DATA_FILE_NAME), "plotinfo")
+    plot2 = load(joinpath(path_to_folder2, PaS_DATA_FILE_NAME), "plotinfo")
     remove_lock(path_to_folder1)
     remove_lock(path_to_folder2)
     combineplots(new_path, plot1, plot2)
@@ -147,7 +150,7 @@ end
 
 function get_traj(path::String)
     wait_and_lock_folder(path)
-    plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+    plotinfo = load(joinpath(path, PaS_DATA_FILE_NAME), "plotinfo")
     remove_lock(path)
     return get_traj(plotinfo)
 end
