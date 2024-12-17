@@ -33,7 +33,11 @@ function is_folder_locked(path)
 end
 
 function wait_until_unlocked(path)
+    time_waited = 0
+    wait_time = 10
     while is_folder_locked(path)
-        sleep(1)  # Sleep for 1 second before checking again
+        println("Folder locked: $path. Waited for $time_waited seconds. Waiting folder to unlock...")
+        sleep(wait_time)  # Sleep for wait_time second before checking again
+        time_waited += wait_time
     end
 end

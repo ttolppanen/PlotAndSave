@@ -120,10 +120,10 @@ end
 
 function combineplots(new_path, path_to_folder1::String, path_to_folder2::String)
     wait_and_lock_folder(path_to_folder1)
-    plot1 = load(joinpath(path_to_folder1, "data.jld2"), "plotinfo")
-    remove_lock(path_to_folder1)
     wait_and_lock_folder(path_to_folder2)
+    plot1 = load(joinpath(path_to_folder1, "data.jld2"), "plotinfo")
     plot2 = load(joinpath(path_to_folder2, "data.jld2"), "plotinfo")
+    remove_lock(path_to_folder1)
     remove_lock(path_to_folder2)
     combineplots(new_path, plot1, plot2)
 end
@@ -142,7 +142,9 @@ function copycode(path)
 end
 
 function get_traj(path::String)
+    wait_and_lock_folder(path)
     plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+    remove_lock(path)
     return get_traj(plotinfo)
 end
 function get_traj(plotinfo::PlotInfo)
