@@ -35,6 +35,20 @@ line2_traj = 1
         @test plotinfo.lines["2"].x == x2
         @test plotinfo.lines["1"].traj == line1_traj * 2
         @test plotinfo.lines["2"].traj == line2_traj * 2
+
+        # with makeplot(add_traj = true)
+        x1 = rand(10); y1 = rand(10)
+        x2 = rand(10); y2 = rand(10)
+        line1 = LineInfo(x1, y1, line1_traj, "1")
+        line2 = LineInfo(x2, y2, line2_traj, "2")
+        path = joinpath(@__DIR__, "test_data")
+        makeplot(path, line1, line2; add_traj = true)
+
+        plotinfo = load(joinpath(path, "data.jld2"), "plotinfo")
+        @test plotinfo.lines["1"].x == x1
+        @test plotinfo.lines["2"].x == x2
+        @test plotinfo.lines["1"].traj == line1_traj * 3
+        @test plotinfo.lines["2"].traj == line2_traj * 3
     end
 
     @testset "HistogramInfo" begin

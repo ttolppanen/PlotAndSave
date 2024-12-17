@@ -18,14 +18,18 @@ export combineplots
 export get_traj
 export x_ticks
 
-function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, param...)
+function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, add_traj = false, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
-    makeplot(path, plotinfo; copy_code)
+    makeplot(path, plotinfo; copy_code, add_traj)
 end
 
-function makeplot(path, plotinfo::PlotInfo; copy_code = true)
-    savedata(path, plotinfo; copy_code)
-    savefigure(path, plotinfo)
+function makeplot(path, plotinfo::PlotInfo; copy_code = true, add_traj = false)
+    if add_traj
+        addtrajectories(path, collect(values(plotinfo.lines))...)
+    else
+        savedata(path, plotinfo; copy_code)
+        savefigure(path, plotinfo)
+    end
 end
 
 function makehistogram(path, data; xlabel::String = "x", ylabel::String = "y", copy_code = true, bins = nothing, param...)
@@ -103,12 +107,12 @@ end
 function addtrajectories(path_to_prev_data::String, new_trajectories...)
     wait_and_lock_folder(path_to_prev_data)
     plotinfo = load(joinpath(path_to_prev_data, "data.jld2"), "plotinfo")
-    remove_lock(path_to_prev_data)
     new_lines = plotinfo.lines
     for traj in new_trajectories
         old_line = plotinfo.lines[traj.tag]
         new_lines[traj.tag] = updateline(old_line, traj)
     end
+    remove_lock(path_to_prev_data)
     makeplot(path_to_prev_data, values(new_lines)...; xlabel = plotinfo.xlabel, ylabel = plotinfo.ylabel, copy_code = false, plotinfo.parameters...)
 end
 
