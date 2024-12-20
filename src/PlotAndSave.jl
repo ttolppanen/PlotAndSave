@@ -17,8 +17,10 @@ export addtrajectories
 export combineplots
 export get_traj
 export x_ticks
+export get_param
 
 const PaS_DATA_FILE_NAME = "data.jld2"
+const PaS_PLOTINFO_NAME = "plotinfo"
 const PaS_PLOT_FILE_NAME = "plot.png"
 
 function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, add_traj = false, param...)
@@ -59,9 +61,9 @@ function savedata(path, plotinfo::PlotInfo; copy_code = true)
     remove_lock(path)
 end
 
-function loaddata(path)
+function loaddata(path, data_name = PaS_DATA_FILE_NAME, plotinfo_name = PaS_PLOTINFO_NAME)
     wait_and_lock_folder(dirname(path))
-    data = load(path, "plotinfo")
+    data = load(joinpath(path, data_name), plotinfo_name)
     remove_lock(dirname(path))
     return data
 end
@@ -109,7 +111,7 @@ end
 
 function addtrajectories(path_to_prev_data::String, new_trajectories...)
     wait_and_lock_folder(path_to_prev_data)
-    plotinfo = load(joinpath(path_to_prev_data, PaS_DATA_FILE_NAME), "plotinfo")
+    plotinfo = load(joinpath(path_to_prev_data, PaS_DATA_FILE_NAME), PaS_PLOTINFO_NAME)
     new_lines = plotinfo.lines
     for traj in new_trajectories
         old_line = plotinfo.lines[traj.tag]
@@ -128,8 +130,8 @@ end
 function combineplots(new_path, path_to_folder1::String, path_to_folder2::String)
     wait_and_lock_folder(path_to_folder1)
     wait_and_lock_folder(path_to_folder2)
-    plot1 = load(joinpath(path_to_folder1, PaS_DATA_FILE_NAME), "plotinfo")
-    plot2 = load(joinpath(path_to_folder2, PaS_DATA_FILE_NAME), "plotinfo")
+    plot1 = load(joinpath(path_to_folder1, PaS_DATA_FILE_NAME), PaS_PLOTINFO_NAME)
+    plot2 = load(joinpath(path_to_folder2, PaS_DATA_FILE_NAME), PaS_PLOTINFO_NAME)
     remove_lock(path_to_folder1)
     remove_lock(path_to_folder2)
     combineplots(new_path, plot1, plot2)
@@ -150,7 +152,7 @@ end
 
 function get_traj(path::String)
     wait_and_lock_folder(path)
-    plotinfo = load(joinpath(path, PaS_DATA_FILE_NAME), "plotinfo")
+    plotinfo = load(joinpath(path, PaS_DATA_FILE_NAME), PaS_PLOTINFO_NAME)
     remove_lock(path)
     return get_traj(plotinfo)
 end
@@ -194,6 +196,21 @@ function x_ticks(start, stop, n_ticks, specific_points...)
         push!(out, current_step)
     end
     return out
+end
+
+function get_param(path, param_key, data_name = PaS_DATA_FILE_NAME, plotinfo_name = PaS_PLOTINFO_NAME; print_param = true)
+    plotinfo = loaddata(path, data_name, plotinfo_name)
+    param = plotinfo.parameters[param_key]
+    if isa(param, Number)
+        param_number = param
+    else
+        param_number = parse(Float64, match(r"\d+(\.\d+)?", param).match) # From chatGPT, somehow takes the numbers from strings like "123.2MHz" -> 123.2
+    end
+    if print_param
+        println("Parameter key | Parameter | Out")
+        println("$(string(param_key)) | $param | $param_number")
+    end
+    return param_number
 end
 
 end # module

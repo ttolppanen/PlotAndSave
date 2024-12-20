@@ -156,7 +156,7 @@ line2_traj = 1
         # and that the plot in make plot and loaddata is the same
         makeplot(joinpath(path, "makeplot"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
         savedata(joinpath(path, "savedata"), line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
-        plotinfo = loaddata(joinpath(path, "savedata", PlotAndSave.PaS_DATA_FILE_NAME))
+        plotinfo = loaddata(joinpath(path, "savedata"))
         makeplot(joinpath(path, "loaddata"), plotinfo; copy_code = false)
     end
 
@@ -165,6 +165,20 @@ line2_traj = 1
         @test (x[4] == 4 && x[5] == 4.5 && x[6] == 5 && x[7] == 5.5 && x[8] == 6)
         x = x_ticks(1, 3, 100, (1, 2, 2), (2.25, 2.75, 2)) # 100 + 50 + 25
         @test length(x) == 175
+    end
+
+    @testset "get_param" begin
+        x1 = rand(10); y1 = rand(10)
+        line1 = LineInfo(x1, y1, line1_traj, "1")
+        path = joinpath(@__DIR__, "get_param")
+        param_dt_val = 0.2
+        param_to_get_val = 20.69
+        makeplot(path, line1; ylabel = "Random Values", dt = param_dt_val, param_to_get = "$(param_to_get_val)GHz", copy_code = false)
+        param_dt = get_param(path, :dt)
+        param_to_get = get_param(path, :param_to_get)
+
+        @test param_dt == param_dt_val
+        @test param_to_get == param_to_get_val
     end
 
 end # testset
