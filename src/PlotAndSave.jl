@@ -15,6 +15,7 @@ export savefigure
 export makehistogram
 export addtrajectories
 export combineplots
+export merge_lines
 export get_traj
 export x_ticks
 export get_param
@@ -138,6 +139,34 @@ function combineplots(new_path, path_to_folder1::String, path_to_folder2::String
 end
 function combineplots(new_path, plot1::PlotInfo, plot2::PlotInfo)
     makeplot(new_path, values(plot1.lines)..., values(plot2.lines)...; xlabel = plot1.xlabel, ylabel = plot1.ylabel, copy_code = false, plot1.parameters...)
+end
+
+function merge_lines(new_path, path_1, path_2)
+    plotinfo_1 = loaddata(path_1)
+    plotinfo_2 = loaddata(path_2)
+    new_plotinfo = merge_lines(plotinfo_1, plotinfo_2)
+    makeplot(new_path, new_plotinfo)
+end
+function merge_lines(plotinfo_1::PlotInfo, plotinfo_2::PlotInfo)
+    new_lines = []
+    for line in values(plotinfo_2.lines)
+        push!(new_lines, merge_lines(plotinfo_1.lines[line.tag], line))
+    end
+    return PlotInfo(new_lines...; plotinfo_1.xlabel, plotinfo_1.ylabel, plotinfo_1.parameters...)
+end    
+function merge_lines(line_1::LineInfo, line_2::LineInfo)
+    if line_1.tag != line_2.tag
+        error("Tags do not match: line_1.tag = $(line_1.tag), line_2.tag = $(line_2.tag)")
+    end
+    if line_1.traj != line_2.traj
+        error("Trajectories do not match: line_1.traj = $(line_1.traj), line_2.traj = $(line_2.traj)")
+    end
+    diff_val_i = findall(x -> !(x in line_1.x), line_2.x)
+    temp_line_2 = LineInfo(line_2.x[diff_val_i], line_2.y[diff_val_i], line_2.traj, line_2.tag)
+    merged_x = vcat(line_1.x, temp_line_2.x)
+    merged_y = vcat(line_1.y, temp_line_2.y)
+    sorted_i = sortperm(merged_x)
+    return LineInfo(merged_x[sorted_i], merged_y[sorted_i], line_1.traj, line_1.tag)
 end
 
 function copycode(path)
