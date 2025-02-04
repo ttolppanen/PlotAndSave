@@ -19,6 +19,8 @@ export merge_lines
 export get_traj
 export x_ticks
 export get_param
+export reduce_data!
+export reduce_data
 
 const PaS_DATA_FILE_NAME = "data.jld2"
 const PaS_PLOTINFO_NAME = "plotinfo"
@@ -62,11 +64,11 @@ function savedata(path, plotinfo::PlotInfo; copy_code = true)
     remove_lock(path)
 end
 
-function loaddata(path, data_name = PaS_DATA_FILE_NAME, plotinfo_name = PaS_PLOTINFO_NAME)
-    wait_and_lock_folder(dirname(path))
+function loaddata(path, data_name = PaS_DATA_FILE_NAME, plotinfo_name = PaS_PLOTINFO_NAME)::PlotInfo
+    wait_and_lock_folder(path)
     data = load(joinpath(path, data_name), plotinfo_name)
-    remove_lock(dirname(path))
-    return data
+    remove_lock(path)
+    return data::PlotInfo
 end
 
 function savefigure(path::String, plotinfo::PlotInfo)
@@ -240,6 +242,28 @@ function get_param(path, param_key, data_name = PaS_DATA_FILE_NAME, plotinfo_nam
         println("$(string(param_key)) | $param | $param_number")
     end
     return param_number
+end
+
+function reduce_data!(path, data_name = PaS_DATA_FILE_NAME, plotinfo_name = PaS_PLOTINFO_NAME; kwargs...)
+    data = loaddata(path, data_name, plotinfo_name)
+    new_plotinfo = reduce_data(data; kwargs...)
+    savedata(path, new_plotinfo; copy_code = false)
+end
+function reduce_data(plotinfo::PlotInfo; ticks = 999)
+    new_lines = []
+    for line in values(plotinfo.lines)
+        if length(line.x) <= ticks
+            continue
+        end
+        new_ticks = []
+        l = length(line.x) / (ticks - 1)
+        for i in 1:ticks
+            j = clamp(round(Int, (i - 1) * l), 1, length(line.x))
+            push!(new_ticks, j)
+        end
+        push!(new_lines, LineInfo(line.x[new_ticks], line.y[new_ticks], line.traj, line.tag))
+    end
+    return PlotInfo(new_lines...; xlabel = plotinfo.xlabel, ylabel = plotinfo.ylabel, plotinfo.parameters...)
 end
 
 end # module

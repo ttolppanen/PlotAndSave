@@ -207,4 +207,30 @@ line2_traj = 1
         @test line.y == y
     end
 
+    @testset "reduce_data" begin
+        # Create new test data for reduce_data
+        x1 = rand(100); y1 = rand(100)
+        x2 = rand(100); y2 = rand(100)
+        line1 = LineInfo(x1, y1, line1_traj, "1")
+        line2 = LineInfo(x2, y2, line2_traj, "2")
+        path = joinpath(@__DIR__, "reduce_data")
+        makeplot(path, line1, line2; ylabel = "Random Values", dt = 0.2, n = 4, testing = "abcd", copy_code = false)
+
+        # Load the test data
+        plotinfo = loaddata(path)
+        new_plotinfo = reduce_data(plotinfo; ticks = 10)
+        @test length(new_plotinfo.lines["1"].x) == 10
+        @test length(new_plotinfo.lines["1"].y) == 10
+        @test length(new_plotinfo.lines["2"].x) == 10
+        @test length(new_plotinfo.lines["2"].y) == 10
+
+        # Use reduce_data! with the path
+        reduce_data!(path; ticks = 10)
+        plotinfo = loaddata(path)
+        @test length(plotinfo.lines["1"].x) == 10
+        @test length(plotinfo.lines["1"].y) == 10
+        @test length(plotinfo.lines["2"].x) == 10
+        @test length(plotinfo.lines["2"].y) == 10
+    end
+
 end # testset
