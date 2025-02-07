@@ -256,6 +256,7 @@ function reduce_data(plotinfo::PlotInfo; ticks = 999)
     new_lines = []
     for line in values(plotinfo.lines)
         if length(line.x) <= ticks
+            push!(new_lines, line)
             continue
         end
         new_ticks = []
