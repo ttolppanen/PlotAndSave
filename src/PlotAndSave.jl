@@ -26,12 +26,15 @@ const PaS_DATA_FILE_NAME = "data.jld2"
 const PaS_PLOTINFO_NAME = "plotinfo"
 const PaS_PLOT_FILE_NAME = "plot.png"
 
-function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, add_traj = false, param...)
+function makeplot(path, lines...; xlabel::String = "x", ylabel::String = "y", copy_code = true, add_traj = false, cut_data = false, param...)
     plotinfo = PlotInfo(lines...; xlabel, ylabel, param...)
-    makeplot(path, plotinfo; copy_code, add_traj)
+    makeplot(path, plotinfo; copy_code, add_traj, cut_data)
 end
 
-function makeplot(path, plotinfo::PlotInfo; copy_code = true, add_traj = false)
+function makeplot(path, plotinfo::PlotInfo; copy_code = true, add_traj = false, cut_data = false)
+    if cut_data
+        plotinfo = reduce_data(plotinfo)
+    end
     if add_traj && isfile(joinpath(path, PaS_DATA_FILE_NAME))
         addtrajectories(path, collect(values(plotinfo.lines))...)
     else
