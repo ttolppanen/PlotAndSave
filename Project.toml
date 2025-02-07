@@ -1,7 +1,7 @@
 name = "PlotAndSave"
 uuid = "17f9de49-761f-4084-9189-3237cc0765fb"
 authors = ["ttolppanen <taneli.tolppanen@gmail.com>"]
-version = "0.2.16"
+version = "0.2.17"
 
 [deps]
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
